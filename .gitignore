@@ -1,2 +1,6 @@
 build/
 imgui.ini
+
+#ignore Doxygen generated files
+docs/html/
+docs/latex/
