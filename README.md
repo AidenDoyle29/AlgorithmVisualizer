@@ -3,7 +3,18 @@ Our project is an algorithm visualization learning tool for computer science stu
 
 The target users are primarily computer science students, especially those taking courses such as CS 311 or other classes involving data structures and algorithms. Secondary stakeholders include instructors and TAs who may use the system for demonstrations or classroom support. The main objective is to help students better understand algorithm behavior, algorithm efficiency, and tradeoffs through interactive simulation instead of only static examples. This system serves the Five College community by providing a shared educational tool that supports algorithm learning across multiple campuses, while also reinforcing our own understanding as we build it.
 
-To create executable:
+# Developer Setup
+### 1. Install Doxygen (For Documentation)
+* **Mac:** `brew install doxygen`
+* **Windows:** Download the installer from [Doxygen's website](https://www.doxygen.nl/download.html) and add it to your System PATH.
+* **Linux:** `sudo apt-get install doxygen`
+
+### 2. Generating Docs Locally
+Once installed, open your terminal, navigate to the `docs/` folder, and run:
+`doxygen Doxyfile`
+This will generate an `html/` folder. Open `docs/html/index.html` in your browser to view the documentation.
+
+### To create executable:
 rm -rf build
 cmake -B build
 cmake --build build

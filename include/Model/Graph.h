@@ -1,2 +1,3 @@
 //Graph.h
+#pragma once
 
