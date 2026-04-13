@@ -38,13 +38,33 @@ endif()
 set(IMGUI_DIR "${imgui_SOURCE_DIR}" CACHE PATH "Path to ImGui" FORCE)
 set(IMGUI_SFML_FIND_SFML OFF CACHE BOOL "" FORCE)
 
+# 4. Declare GTest
+FetchContent_Declare(
+  googletest
+  GIT_REPOSITORY https://github.com/google/googletest.git
+  GIT_TAG v1.14.0
+)
+set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
+
 # Now make everything available
-FetchContent_MakeAvailable(SFML imgui-sfml)
+FetchContent_MakeAvailable(SFML imgui-sfml googletest)
 # --- THE FIX ENDS HERE ---
 
-add_executable(AlgorithmVisualizer main.cpp)
-
-target_link_libraries(AlgorithmVisualizer
-    PRIVATE
-    ImGui-SFML::ImGui-SFML
+# Source files for core logic
+set(CORE_SOURCES
+    src/Model/Graph.cpp
+    src/Model/BFSStrategy.cpp
 )
+
+add_executable(AlgorithmVisualizer main.cpp ${CORE_SOURCES})
+target_include_directories(AlgorithmVisualizer PRIVATE include include/Model)
+target_link_libraries(AlgorithmVisualizer PRIVATE ImGui-SFML::ImGui-SFML)
+
+# --- Unit Testing ---
+enable_testing()
+add_executable(RunTests tests/test_bfs.cpp ${CORE_SOURCES})
+target_include_directories(RunTests PRIVATE include include/Model)
+target_link_libraries(RunTests GTest::gtest_main)
+
+include(GoogleTest)
+gtest_discover_tests(RunTests)
