@@ -53,17 +53,27 @@ FetchContent_MakeAvailable(SFML imgui-sfml googletest)
 # Source files for core logic
 set(CORE_SOURCES
     src/Model/Graph.cpp
-    src/Model/BFSStrategy.cpp
+    src/Algorithm/BFSStrategy.cpp
 )
 
 add_executable(AlgorithmVisualizer main.cpp ${CORE_SOURCES})
-target_include_directories(AlgorithmVisualizer PRIVATE include include/Model)
+target_include_directories(AlgorithmVisualizer PRIVATE 
+    include 
+    include/Model 
+    include/Algorithm 
+    include/Playback
+)
 target_link_libraries(AlgorithmVisualizer PRIVATE ImGui-SFML::ImGui-SFML)
 
 # --- Unit Testing ---
 enable_testing()
 add_executable(RunTests tests/test_bfs.cpp ${CORE_SOURCES})
-target_include_directories(RunTests PRIVATE include include/Model)
+target_include_directories(RunTests PRIVATE 
+    include 
+    include/Model 
+    include/Algorithm 
+    include/Playback
+)
 target_link_libraries(RunTests GTest::gtest_main)
 
 include(GoogleTest)
