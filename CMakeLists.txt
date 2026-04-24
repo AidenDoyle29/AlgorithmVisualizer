@@ -54,7 +54,8 @@ FetchContent_MakeAvailable(SFML imgui-sfml googletest)
 set(CORE_SOURCES
     src/Model/Graph.cpp
     src/Algorithm/BFSStrategy.cpp
-    src/View/UIManager.cpp  # add this
+    src/View/UIManager.cpp
+    src/View/UIPlaybackBar.cpp
 )
 set(TEST_SOURCES
     src/Model/Graph.cpp

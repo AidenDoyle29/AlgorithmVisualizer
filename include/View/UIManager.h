@@ -1,8 +1,8 @@
-//UIManager.h
 #pragma once
-#include <imgui.h>
-#include <imgui-SFML.h>
+#include "imgui.h"
+#include "imgui-SFML.h"
 #include <SFML/Graphics.hpp>
+#include "UIPlaybackBar.h"
 
 class UIManager {
 public:
@@ -16,4 +16,5 @@ private:
 
     sf::RenderWindow window;
     sf::Clock deltaClock;
+    UIPlaybackBar playbackBar;  // add this
 };

@@ -1,5 +1,6 @@
 //UIManager.cpp
 #include "View/UIManager.h"
+#include "View/UIPlaybackBar.h"
 
 UIManager::UIManager(unsigned int width, unsigned int height, const std::string& title)
     : window(sf::VideoMode(width, height), title)
@@ -25,9 +26,39 @@ void UIManager::handleEvents() {
 }
 
 void UIManager::render() {
-    ImGui::Begin("Settings");
-    ImGui::Text("Ready to visualize!");
+    ImGuiIO& io = ImGui::GetIO();
+
+    // Title bar
+    ImGui::SetNextWindowPos(ImVec2(0, 0));
+    ImGui::SetNextWindowSize(ImVec2(io.DisplaySize.x, 40));
+    ImGui::Begin("##titlebar", nullptr,
+        ImGuiWindowFlags_NoResize |
+        ImGuiWindowFlags_NoMove |
+        ImGuiWindowFlags_NoTitleBar
+    );
+    ImGui::SetWindowFontScale(2.0f);
+    ImGui::Text("Algorithm Visualizer");
+    ImGui::SetWindowFontScale(1.0f);
     ImGui::End();
+
+    // Sidebar
+    ImGui::SetNextWindowPos(ImVec2(0, 40));
+    ImGui::SetNextWindowSize(ImVec2(250, io.DisplaySize.y - 90));
+    ImGui::Begin("##sidebar", nullptr,
+        ImGuiWindowFlags_NoResize |
+        ImGuiWindowFlags_NoMove |
+        ImGuiWindowFlags_NoTitleBar
+    );
+    ImGui::Text("Algorithm");
+    ImGui::Separator();
+    ImGui::Button("BFS");
+    ImGui::Text("Graph Controls");
+    ImGui::Separator();
+    ImGui::Button("Add Node");
+    ImGui::Button("Add Edge");
+    ImGui::End();
+
+    playbackBar.draw();
 
     window.clear();
     ImGui::SFML::Render(window);
