@@ -1,4 +1,5 @@
 build/
+build.log
 imgui.ini
 
 #ignore Doxygen generated files
