@@ -11,6 +11,16 @@ namespace av::controller {
 
 namespace {
 
+/**
+ * @brief Validates that an algorithm is compatible with a graph.
+ * 
+ * Checks if the algorithm supports the current graph type and has necessary
+ * prerequisites (e.g., weighted edges for weighted algorithms).
+ * 
+ * @param algorithm The algorithm to validate.
+ * @param graph The graph to validate against.
+ * @throws std::invalid_argument if the algorithm is incompatible.
+ */
 void ensureGraphAlgorithmCompatible(const algorithm::IAlgorithm& algorithm, const model::Graph& graph) {
     if (!algorithm.supports(graph)) {
         throw std::invalid_argument("algorithm " + algorithm.name() + " does not support the current graph");
@@ -21,6 +31,14 @@ void ensureGraphAlgorithmCompatible(const algorithm::IAlgorithm& algorithm, cons
     }
 }
 
+/**
+ * @brief Parses space-separated integer values from a string.
+ * 
+ * Reads integers from the input string using whitespace as delimiters.
+ * 
+ * @param payload A string containing space-separated integers.
+ * @return A vector of parsed integer values.
+ */
 std::vector<int> parseArrayValues(const std::string& payload) {
     std::istringstream stream(payload);
     std::vector<int> values;
@@ -33,62 +51,143 @@ std::vector<int> parseArrayValues(const std::string& payload) {
 
 }  // namespace
 
+/**
+ * @brief Constructs an InputHandler with an empty undirected graph.
+ * 
+ * Initializes the graph, registers the renderer as an observer, and sets
+ * the workspace mode to Graph.
+ */
 InputHandler::InputHandler() : graph_(false) {
     graph_.addObserver(&renderer_);
 }
 
+/**
+ * @brief Gets mutable reference to the working graph.
+ * 
+ * @return Reference to the internal Graph object.
+ */
 model::Graph& InputHandler::graph() noexcept {
     return graph_;
 }
 
+/**
+ * @brief Gets const reference to the working graph.
+ * 
+ * @return Const reference to the internal Graph object.
+ */
 const model::Graph& InputHandler::graph() const noexcept {
     return graph_;
 }
 
+/**
+ * @brief Gets const reference to the graph renderer.
+ * 
+ * @return Const reference to the GraphRenderer.
+ */
 const view::GraphRenderer& InputHandler::renderer() const noexcept {
     return renderer_;
 }
 
+/**
+ * @brief Gets mutable reference to the playback session.
+ * 
+ * @return Reference to the PlaybackSession managing algorithm frame playback.
+ */
 playback::PlaybackSession& InputHandler::playbackSession() noexcept {
     return playbackSession_;
 }
 
+/**
+ * @brief Gets const reference to the playback session.
+ * 
+ * @return Const reference to the PlaybackSession.
+ */
 const playback::PlaybackSession& InputHandler::playbackSession() const noexcept {
     return playbackSession_;
 }
 
+/**
+ * @brief Gets the current workspace mode.
+ * 
+ * @return The current WorkspaceMode (Graph or Sort).
+ */
 WorkspaceMode InputHandler::mode() const noexcept {
     return mode_;
 }
 
+/**
+ * @brief Gets list of available algorithms for the current mode.
+ * 
+ * Returns graph algorithms if in Graph mode, sorting algorithms if in Sort mode.
+ * 
+ * @return Vector of algorithm names available for the current workspace mode.
+ */
 std::vector<std::string> InputHandler::availableAlgorithms() const {
     return mode_ == WorkspaceMode::Graph ? availableGraphAlgorithms() : availableSortingAlgorithms();
 }
 
+/**
+ * @brief Gets list of available graph algorithms.
+ * 
+ * @return Vector of graph algorithm names.
+ */
 std::vector<std::string> InputHandler::availableGraphAlgorithms() const {
     return algorithmFactory_.availableAlgorithms();
 }
 
+/**
+ * @brief Gets list of available sorting algorithms.
+ * 
+ * @return Vector of sorting algorithm names.
+ */
 std::vector<std::string> InputHandler::availableSortingAlgorithms() const {
     return sortingAlgorithmFactory_.availableAlgorithms();
 }
 
+/**
+ * @brief Gets the currently selected algorithm for the active mode.
+ * 
+ * @return The name of the selected algorithm.
+ */
 const std::string& InputHandler::selectedAlgorithm() const noexcept {
     return mode_ == WorkspaceMode::Graph ? selectedGraphAlgorithm_ : selectedSortingAlgorithm_;
 }
 
+/**
+ * @brief Gets the currently selected graph algorithm.
+ * 
+ * @return The name of the selected graph algorithm.
+ */
 const std::string& InputHandler::selectedGraphAlgorithm() const noexcept {
     return selectedGraphAlgorithm_;
 }
 
+/**
+ * @brief Gets the currently selected sorting algorithm.
+ * 
+ * @return The name of the selected sorting algorithm.
+ */
 const std::string& InputHandler::selectedSortingAlgorithm() const noexcept {
     return selectedSortingAlgorithm_;
 }
 
+/**
+ * @brief Gets the current array to be sorted.
+ * 
+ * @return Const reference to the sorting values vector.
+ */
 const std::vector<int>& InputHandler::sortingValues() const noexcept {
     return sortingValues_;
 }
 
+/**
+ * @brief Clears the workspace and optionally creates a new graph.
+ * 
+ * Removes all nodes and edges, resets algorithm selection, and clears playback.
+ * Sets workspace mode to Graph.
+ * 
+ * @param directed If true, creates a directed graph; if false, undirected.
+ */
 void InputHandler::resetWorkspace(const bool directed) {
     graph_ = model::Graph(directed);
     graph_.addObserver(&renderer_);
@@ -96,6 +195,12 @@ void InputHandler::resetWorkspace(const bool directed) {
     playbackSession_.load({});
 }
 
+/**
+ * @brief Populates the graph with a sample 5-node network.
+ * 
+ * Creates nodes A-E with edges demonstrating various weights and connections.
+ * Switches workspace to Graph mode.
+ */
 void InputHandler::buildSampleGraph() {
     mode_ = WorkspaceMode::Graph;
     resetWorkspace(false);
@@ -112,12 +217,22 @@ void InputHandler::buildSampleGraph() {
     graph_.addEdge("BE", "B", "E", 6.0);
 }
 
+/**
+ * @brief Populates the sorting array with sample data.
+ * 
+ * Creates an 8-element array with preset values. Switches workspace to Sort mode.
+ */
 void InputHandler::buildSampleArray() {
     mode_ = WorkspaceMode::Sort;
     sortingValues_ = {7, 3, 8, 2, 6, 4, 1, 5};
     playbackSession_.load({});
 }
 
+/**
+ * @brief Randomly shuffles the sorting array.
+ * 
+ * Uses std::shuffle with a random seed. If array is empty, builds sample array first.
+ */
 void InputHandler::shuffleSortingValues() {
     if (sortingValues_.empty()) {
         buildSampleArray();
@@ -128,6 +243,11 @@ void InputHandler::shuffleSortingValues() {
     std::shuffle(sortingValues_.begin(), sortingValues_.end(), generator);
 }
 
+/**
+ * @brief Fills the sorting array with ascending integers 1..n.
+ * 
+ * Resizes array to 8 if empty, then populates with values 1 through size.
+ */
 void InputHandler::generateSortedArray() {
     if (sortingValues_.empty()) {
         sortingValues_.resize(8);
@@ -138,6 +258,11 @@ void InputHandler::generateSortedArray() {
     }
 }
 
+/**
+ * @brief Fills the sorting array with descending integers n..1.
+ * 
+ * Resizes array to 8 if empty, then populates with values in reverse order.
+ */
 void InputHandler::generateReverseSortedArray() {
     if (sortingValues_.empty()) {
         sortingValues_.resize(8);
@@ -148,10 +273,23 @@ void InputHandler::generateReverseSortedArray() {
     }
 }
 
+/**
+ * @brief Sets the sorting array to new values.
+ * 
+ * @param values The new array values (will be moved).
+ */
 void InputHandler::setSortingValues(std::vector<int> values) {
     sortingValues_ = std::move(values);
 }
 
+/**
+ * @brief Switches between Graph and Sort workspace modes.
+ * 
+ * Clears playback history. If switching to Sort mode with empty array,
+ * builds a sample array automatically.
+ * 
+ * @param mode The new workspace mode to activate.
+ */
 void InputHandler::setMode(const WorkspaceMode mode) {
     mode_ = mode;
     playbackSession_.load({});
@@ -160,6 +298,14 @@ void InputHandler::setMode(const WorkspaceMode mode) {
     }
 }
 
+/**
+ * @brief Selects an algorithm based on current workspace mode.
+ * 
+ * Dispatches to selectGraphAlgorithm or selectSortingAlgorithm accordingly.
+ * 
+ * @param name The algorithm name to select.
+ * @throws std::invalid_argument if the algorithm does not exist.
+ */
 void InputHandler::selectAlgorithm(const std::string& name) {
     if (mode_ == WorkspaceMode::Graph) {
         selectGraphAlgorithm(name);
@@ -168,14 +314,36 @@ void InputHandler::selectAlgorithm(const std::string& name) {
     }
 }
 
+/**
+ * @brief Selects a graph algorithm by name.
+ * 
+ * @param name The graph algorithm name to select.
+ * @throws std::invalid_argument if the algorithm does not exist.
+ */
 void InputHandler::selectGraphAlgorithm(const std::string& name) {
     selectedGraphAlgorithm_ = requireAlgorithm(name)->name();
 }
 
+/**
+ * @brief Selects a sorting algorithm by name.
+ * 
+ * @param name The sorting algorithm name to select.
+ * @throws std::invalid_argument if the algorithm does not exist.
+ */
 void InputHandler::selectSortingAlgorithm(const std::string& name) {
     selectedSortingAlgorithm_ = requireSortingAlgorithm(name)->name();
 }
 
+/**
+ * @brief Executes the currently selected algorithm.
+ * 
+ * Runs graph or sorting algorithm depending on mode. Loads resulting frames
+ * into the playback session and returns detailed results.
+ * 
+ * @param context Algorithm context (start node, goal node, etc.).
+ * @return AlgorithmRunResult containing frames, metrics, and output.
+ * @throws std::invalid_argument if the algorithm is incompatible with current data.
+ */
 algorithm::AlgorithmRunResult InputHandler::runSelectedAlgorithm(const algorithm::AlgorithmContext& context) {
     algorithm::AlgorithmRunResult result;
     if (mode_ == WorkspaceMode::Graph) {
@@ -190,6 +358,18 @@ algorithm::AlgorithmRunResult InputHandler::runSelectedAlgorithm(const algorithm
     return result;
 }
 
+/**
+ * @brief Compares results from two algorithms side-by-side.
+ * 
+ * Runs both algorithms on current graph/array and returns their results
+ * for comparison analysis.
+ * 
+ * @param leftAlgorithm Name of the left algorithm to compare.
+ * @param rightAlgorithm Name of the right algorithm to compare.
+ * @param context Algorithm context (start node, goal node, etc.).
+ * @return ComparisonResult containing both algorithm outputs.
+ * @throws std::invalid_argument if either algorithm is invalid.
+ */
 ComparisonResult InputHandler::compareAlgorithms(
     const std::string& leftAlgorithm,
     const std::string& rightAlgorithm,
@@ -207,6 +387,17 @@ ComparisonResult InputHandler::compareAlgorithms(
     return ComparisonResult {left->run(sortingValues_), right->run(sortingValues_)};
 }
 
+/**
+ * @brief Creates a quiz question about algorithm identification.
+ * 
+ * Generates a multiple-choice question asking the user to identify which
+ * algorithm produced a given visualization.
+ * 
+ * @param algorithmName Name of the algorithm to quiz about.
+ * @param context Algorithm context (start node, goal node, etc.).
+ * @return A QuizQuestion with choices and the correct answer.
+ * @throws std::invalid_argument if the algorithm is invalid or incompatible.
+ */
 QuizQuestion InputHandler::createQuiz(const std::string& algorithmName, const algorithm::AlgorithmContext& context) const {
     if (mode_ == WorkspaceMode::Graph) {
         const auto algorithm = requireAlgorithm(algorithmName);
@@ -228,10 +419,29 @@ QuizQuestion InputHandler::createQuiz(const std::string& algorithmName, const al
         algorithm->run(sortingValues_)};
 }
 
+/**
+ * @brief Validates a quiz answer.
+ * 
+ * Checks if the user's guess matches the correct algorithm for a quiz question.
+ * 
+ * @param question The quiz question with the correct answer.
+ * @param guess The user's guess (algorithm name).
+ * @return true if the guess is correct, false otherwise.
+ */
 bool InputHandler::checkQuizAnswer(const QuizQuestion& question, const std::string& guess) const {
     return question.correctAlgorithm == guess;
 }
 
+/**
+ * @brief Saves the current workspace state to a scenario file.
+ * 
+ * Serializes the graph, algorithms, and array data to a text file
+ * that can be loaded later.
+ * 
+ * @param path File path where the scenario will be written.
+ * @param scenario The workspace state to save.
+ * @throws std::runtime_error if the file cannot be opened for writing.
+ */
 void InputHandler::saveScenario(const std::string& path, const Scenario& scenario) const {
     std::ofstream stream(path);
     if (!stream.is_open()) {
@@ -260,6 +470,16 @@ void InputHandler::saveScenario(const std::string& path, const Scenario& scenari
     }
 }
 
+/**
+ * @brief Loads a workspace state from a scenario file.
+ * 
+ * Deserializes graph, algorithms, and array data from a previously saved
+ * scenario file.
+ * 
+ * @param path File path to read the scenario from.
+ * @return A Scenario object with loaded workspace state.
+ * @throws std::runtime_error if the file cannot be opened or contains invalid tokens.
+ */
 Scenario InputHandler::loadScenario(const std::string& path) const {
     std::ifstream stream(path);
     if (!stream.is_open()) {
@@ -310,6 +530,14 @@ Scenario InputHandler::loadScenario(const std::string& path) const {
     return scenario;
 }
 
+/**
+ * @brief Applies a saved scenario to the current workspace.
+ * 
+ * Restores the graph, algorithm selection, and array data from a scenario.
+ * Updates all internal state and observers.
+ * 
+ * @param scenario The scenario to apply.
+ */
 void InputHandler::applyScenario(const Scenario& scenario) {
     graph_ = scenario.graph;
     graph_.addObserver(&renderer_);
@@ -326,10 +554,24 @@ void InputHandler::applyScenario(const Scenario& scenario) {
     }
 }
 
+/**
+ * @brief Gets a graph algorithm instance by name.
+ * 
+ * @param name The algorithm name to retrieve.
+ * @return Shared pointer to the requested algorithm.
+ * @throws std::invalid_argument if the algorithm does not exist.
+ */
 std::shared_ptr<const algorithm::IAlgorithm> InputHandler::requireAlgorithm(const std::string& name) const {
     return algorithmFactory_.get(name);
 }
 
+/**
+ * @brief Gets a sorting algorithm instance by name.
+ * 
+ * @param name The algorithm name to retrieve.
+ * @return Shared pointer to the requested sorting algorithm.
+ * @throws std::invalid_argument if the algorithm does not exist.
+ */
 std::shared_ptr<const algorithm::ISortingAlgorithm> InputHandler::requireSortingAlgorithm(const std::string& name) const {
     return sortingAlgorithmFactory_.get(name);
 }
