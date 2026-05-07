@@ -54,6 +54,12 @@ FetchContent_MakeAvailable(SFML imgui-sfml googletest)
 set(CORE_SOURCES
     src/Model/Graph.cpp
     src/Algorithm/BFSStrategy.cpp
+    src/View/UIManager.cpp
+    src/View/UIPlaybackBar.cpp
+)
+set(TEST_SOURCES
+    src/Model/Graph.cpp
+    src/Algorithm/BFSStrategy.cpp
 )
 
 add_executable(AlgorithmVisualizer main.cpp ${CORE_SOURCES})
@@ -62,12 +68,15 @@ target_include_directories(AlgorithmVisualizer PRIVATE
     include/Model 
     include/Algorithm 
     include/Playback
+    include/View
+    ${imgui_SOURCE_DIR}
+    ${imgui-sfml_SOURCE_DIR}
 )
 target_link_libraries(AlgorithmVisualizer PRIVATE ImGui-SFML::ImGui-SFML)
 
 # --- Unit Testing ---
 enable_testing()
-add_executable(RunTests tests/test_bfs.cpp ${CORE_SOURCES})
+add_executable(RunTests tests/test_bfs.cpp ${TEST_SOURCES})
 target_include_directories(RunTests PRIVATE 
     include 
     include/Model 
