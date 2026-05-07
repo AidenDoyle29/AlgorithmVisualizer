@@ -7,6 +7,15 @@ namespace av::view {
 
 namespace {
 
+/**
+ * @brief Converts algorithm metrics into a formatted string representation.
+ * 
+ * Combines all tracked metrics (steps, visited nodes, comparisons, swaps, etc.)
+ * into a single comma-separated string suitable for display purposes.
+ * 
+ * @param metrics The AlgorithmMetrics object containing performance data.
+ * @return A formatted string with all metrics in key=value format.
+ */
 std::string renderMetrics(const algorithm::AlgorithmMetrics& metrics) {
     std::ostringstream stream;
     stream << "steps=" << metrics.stepsTaken << ", visited=" << metrics.visitedNodes
@@ -17,6 +26,15 @@ std::string renderMetrics(const algorithm::AlgorithmMetrics& metrics) {
     return stream.str();
 }
 
+/**
+ * @brief Converts an array cell state enum to its string representation.
+ * 
+ * Maps visual state enumerations (Normal, Active, Compared, etc.) to human-readable
+ * strings for debugging and display purposes.
+ * 
+ * @param state The ArrayCellState enum value to convert.
+ * @return A lowercase string representation of the state (e.g., "compared", "sorted").
+ */
 std::string renderArrayState(const algorithm::ArrayCellState state) {
     switch (state) {
         case algorithm::ArrayCellState::Normal:
@@ -38,10 +56,28 @@ std::string renderArrayState(const algorithm::ArrayCellState state) {
 
 }  // namespace
 
+/**
+ * @brief Handles graph change events and stores the rendered output.
+ * 
+ * Called when the underlying graph model changes. Updates the last rendered output
+ * with the event reason and current graph state for display or debugging.
+ * 
+ * @param event The GraphEvent containing the reason and updated graph state.
+ */
 void GraphRenderer::onGraphChanged(const model::GraphEvent& event) {
     lastRenderedOutput_ = "Graph event: " + event.reason + "\n" + renderGraph(event.graph);
 }
 
+/**
+ * @brief Renders a graph structure into a formatted text representation.
+ * 
+ * Creates a human-readable string showing all nodes and edges in the graph,
+ * including their states, annotations, and positions. Indicates whether the
+ * graph is directed or undirected.
+ * 
+ * @param graph The Graph object to render.
+ * @return A formatted string representation of the graph structure.
+ */
 std::string GraphRenderer::renderGraph(const model::Graph& graph) const {
     std::ostringstream stream;
     stream << "Graph (" << (graph.isDirected() ? "directed" : "undirected") << ")\n";
@@ -66,6 +102,17 @@ std::string GraphRenderer::renderGraph(const model::Graph& graph) const {
     return stream.str();
 }
 
+/**
+ * @brief Renders a playback frame into a formatted text representation.
+ * 
+ * Converts a single frame from algorithm playback into human-readable output.
+ * Handles both array visualization (showing element values and states) and
+ * graph visualization (showing node and edge states). Includes frame title,
+ * details, metrics, and completion status.
+ * 
+ * @param frame The PlaybackFrame to render.
+ * @return A formatted string representation of the frame contents.
+ */
 std::string GraphRenderer::renderFrame(const algorithm::PlaybackFrame& frame) const {
     if (frame.visualizationType == algorithm::VisualizationType::Array) {
         std::ostringstream stream;
@@ -101,6 +148,17 @@ std::string GraphRenderer::renderFrame(const algorithm::PlaybackFrame& frame) co
     return stream.str();
 }
 
+/**
+ * @brief Creates a side-by-side comparison view of two algorithm runs.
+ * 
+ * Generates a ComparisonView structure containing the final frames from both
+ * algorithm executions along with a summary comparing their metrics and performance.
+ * Useful for analyzing differences in algorithm behavior and efficiency.
+ * 
+ * @param left The AlgorithmRunResult from the left algorithm to compare.
+ * @param right The AlgorithmRunResult from the right algorithm to compare.
+ * @return A ComparisonView containing rendered frames and summary statistics.
+ */
 ComparisonView GraphRenderer::renderComparison(
     const algorithm::AlgorithmRunResult& left,
     const algorithm::AlgorithmRunResult& right) const {
@@ -116,6 +174,14 @@ ComparisonView GraphRenderer::renderComparison(
         summary.str()};
 }
 
+/**
+ * @brief Retrieves the last rendered output string.
+ * 
+ * Returns a const reference to the most recent rendered output from any
+ * render operation. Useful for debugging or retrieving intermediate results.
+ * 
+ * @return A const reference to the last rendered output string.
+ */
 const std::string& GraphRenderer::lastRenderedOutput() const noexcept {
     return lastRenderedOutput_;
 }
