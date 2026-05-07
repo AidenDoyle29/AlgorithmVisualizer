@@ -6,14 +6,34 @@
 
 namespace av::algorithm {
 
+/**
+ * @brief Returns the display name of the algorithm.
+ * @return A string "BFS".
+ */
 std::string BreadthFirstSearch::name() const {
     return "BFS";
 }
 
+/**
+ * @brief Provides a description of the BFS algorithm.
+ * @return A string describing breadth-first traversal and level-order exploration.
+ */
 std::string BreadthFirstSearch::description() const {
     return "Breadth-first traversal for exploring a graph level by level.";
 }
 
+/**
+ * @brief Executes the Breadth-First Search algorithm on a graph.
+ * 
+ * Performs level-order traversal starting from the specified source node.
+ * Uses a FIFO queue to explore nodes level by level, discovering and visiting
+ * neighbors in order. Generates visualization frames showing the exploration process.
+ * 
+ * @param graph The input graph to traverse.
+ * @param context Contains the startNodeId required for BFS.
+ * @return An AlgorithmRunResult with traversal frames, traversal order, and metrics.
+ * @throws std::invalid_argument if startNodeId is empty or does not exist in the graph.
+ */
 AlgorithmRunResult BreadthFirstSearch::run(const model::Graph& graph, const AlgorithmContext& context) const {
     if (context.startNodeId.empty()) {
         throw std::invalid_argument("BFS requires a start node");
