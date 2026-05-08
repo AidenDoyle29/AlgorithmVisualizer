@@ -21,11 +21,10 @@ SRC := $(shell find src -name '*.cpp' ! -name 'main.cpp' | sort)
 APP_SRC := src/main.cpp
 GUI_SRC := src/gui_main.cpp
 TEST_SRC := tests/test_main.cpp
-GUI_ONLY_SRC := src/View/UIManager.cpp src/View/UIPlaybackBar.cpp
 
-CORE_SRC := $(filter-out $(GUI_SRC) $(GUI_ONLY_SRC),$(SRC))
+CORE_SRC := $(filter-out $(GUI_SRC),$(SRC))
 CORE_OBJ := $(patsubst src/%.cpp,$(BUILD_DIR)/src/%.o,$(CORE_SRC))
-GUI_OBJ := $(patsubst src/%.cpp,$(BUILD_DIR)/src/%.o,$(GUI_ONLY_SRC)) $(BUILD_DIR)/src/gui_main.o
+GUI_OBJ := $(BUILD_DIR)/src/gui_main.o
 APP_OBJ := $(BUILD_DIR)/src/main.o
 TEST_OBJ := $(BUILD_DIR)/tests/test_main.o
 
@@ -40,7 +39,7 @@ $(BUILD_DIR) $(BIN_DIR):
 
 $(BUILD_DIR)/src/%.o: src/%.cpp
 	mkdir -p $(dir $@)
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $< -o $@
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $(SFML_CPPFLAGS) -c $< -o $@
 
 $(BUILD_DIR)/tests/%.o: tests/%.cpp
 	mkdir -p $(dir $@)
@@ -59,13 +58,13 @@ $(COVERAGE_BUILD_DIR)/tests/%.o: tests/%.cpp
 	$(CXX) $(CPPFLAGS) $(COVERAGE_CXXFLAGS) -c $< -o $@
 
 $(APP): $(CORE_OBJ) $(APP_OBJ) | $(BIN_DIR)
-	$(CXX) $(CXXFLAGS) $^ -o $@
+	$(CXX) $(CXXFLAGS) $(SFML_LDFLAGS) $^ $(SFML_LDLIBS) -o $@
 
 $(GUI_APP): $(CORE_OBJ) $(GUI_OBJ) | $(BIN_DIR)
 	$(CXX) $(CXXFLAGS) $(SFML_LDFLAGS) $^ $(SFML_LDLIBS) -o $@
 
 $(TEST_APP): $(CORE_OBJ) $(TEST_OBJ) | $(BIN_DIR)
-	$(CXX) $(CXXFLAGS) $^ -o $@
+	$(CXX) $(CXXFLAGS) $(SFML_LDFLAGS) $^ $(SFML_LDLIBS) -o $@
 
 $(TEST_COVERAGE_APP): $(COVERAGE_CORE_OBJ) $(COVERAGE_TEST_OBJ) | $(BIN_DIR)
 	$(CXX) $(COVERAGE_CXXFLAGS) $^ -o $@
@@ -85,3 +84,4 @@ clean:
 	rm -rf $(BUILD_DIR) $(BIN_DIR) $(COVERAGE_DIR)
 
 .PHONY: all test coverage clean run-gui
+
